@@ -1,0 +1,474 @@
+{
+  "info": {
+    "name": "Simulador Corretora API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "buyOrderId",
+      "value": ""
+    },
+    {
+      "key": "sellOrderId",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@example.com\",\n  \"senha\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set(\"token\", json.token);",
+                  "  pm.collectionVariables.set(\"userId\", json.userId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@example.com\",\n  \"senha\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Request Reset Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/pwd-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "pwd-token"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@example.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tokenRecSenha\": \"COLE_O_TOKEN_AQUI\",\n  \"novaSenha\": \"nova123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "change-password"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senhaAtual\": \"123456\",\n  \"novaSenha\": \"nova123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Market",
+      "item": [
+        {
+          "name": "Clock Tick",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/market/clock",
+              "host": ["{{baseUrl}}"],
+              "path": ["market", "clock"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"incrementoMinutos\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Watch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/market/watchlist",
+              "host": ["{{baseUrl}}"],
+              "path": ["market", "watchlist"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ticker\": \"PETR4\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Remove Watch",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/market/watchlist/PETR4",
+              "host": ["{{baseUrl}}"],
+              "path": ["market", "watchlist", "PETR4"]
+            }
+          }
+        },
+        {
+          "name": "Move Watch",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/market/watchlist/PETR4/move",
+              "host": ["{{baseUrl}}"],
+              "path": ["market", "watchlist", "PETR4", "move"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"novaOrdem\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "List Watch",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/market/watchlist",
+              "host": ["{{baseUrl}}"],
+              "path": ["market", "watchlist"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Register Buy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.id) {",
+                  "  pm.collectionVariables.set(\"buyOrderId\", json.id.toString());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/buy",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "buy"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ticker\": \"PETR4\",\n  \"quantidade\": 10,\n  \"modo\": \"mercado\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Execute Buy",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/orders/buy/{{buyOrderId}}/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "buy", "{{buyOrderId}}", "execute"]
+            }
+          }
+        },
+        {
+          "name": "List Buys",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/orders/buy?status=todas",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "buy"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "todas"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register Sell",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.id) {",
+                  "  pm.collectionVariables.set(\"sellOrderId\", json.id.toString());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/sell",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "sell"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ticker\": \"PETR4\",\n  \"quantidade\": 5,\n  \"modo\": \"mercado\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Execute Sell",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/orders/sell/{{sellOrderId}}/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "sell", "{{sellOrderId}}", "execute"]
+            }
+          }
+        },
+        {
+          "name": "List Sells",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/orders/sell?status=todas",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "sell"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "todas"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallet",
+      "item": [
+        {
+          "name": "List Wallet",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/wallet",
+              "host": ["{{baseUrl}}"],
+              "path": ["wallet"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Account",
+      "item": [
+        {
+          "name": "Deposit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/account/deposit",
+              "host": ["{{baseUrl}}"],
+              "path": ["account", "deposit"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Depósito inicial\",\n  \"valor\": 10000\n}"
+            }
+          }
+        },
+        {
+          "name": "Withdraw",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/account/withdraw",
+              "host": ["{{baseUrl}}"],
+              "path": ["account", "withdraw"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Saque\",\n  \"valor\": 500\n}"
+            }
+          }
+        },
+        {
+          "name": "Statement",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/account/statement",
+              "host": ["{{baseUrl}}"],
+              "path": ["account", "statement"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
