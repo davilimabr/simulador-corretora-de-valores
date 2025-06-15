@@ -36,7 +36,7 @@ async function processCompra(ordem, precoExecucao, t) {
   const valorTotal = ordem.quantidade * precoExecucao;
   // Busca último saldo
   const ultLanc = await ContaCorrente.findOne({ where: { usuarioId: ordem.usuarioId }, order: [['dataHora','DESC']], transaction: t });
-  const saldoAtual = ultLanc?.saldoApos ?? 0;
+  const saldoAtual = parseFloat(ultLanc?.saldoApos ?? 0);
   if (saldoAtual < valorTotal) return; // fundos insuficientes
   const novoSaldo = saldoAtual - valorTotal;
   await ContaCorrente.create({
@@ -52,9 +52,9 @@ async function processCompra(ordem, precoExecucao, t) {
   if (!item) {
     await CarteiraItem.create({ usuarioId: ordem.usuarioId, ticker: ordem.ticker, quantidade: ordem.quantidade, precoCompraMedio: precoExecucao }, { transaction: t });
   } else {
-    const totalAnterior = item.quantidade * item.precoCompraMedio;
+    const totalAnterior = parseFloat(item.quantidade) * parseFloat(item.precoCompraMedio);
     const novoTotal = totalAnterior + valorTotal;
-    const novaQtde = item.quantidade + ordem.quantidade;
+    const novaQtde = parseInt(item.quantidade) + parseInt(ordem.quantidade);
     item.quantidade = novaQtde;
     item.precoCompraMedio = novoTotal / novaQtde;
     await item.save({ transaction: t });
@@ -75,7 +75,7 @@ async function processVenda(ordem, precoExecucao, t) {
   await item.save({ transaction: t });
   // crédito conta corrente
   const ultLanc = await ContaCorrente.findOne({ where: { usuarioId: ordem.usuarioId }, order: [['dataHora','DESC']], transaction: t });
-  const saldoAtual = ultLanc?.saldoApos ?? 0;
+  const saldoAtual = parseFloat(ultLanc?.saldoApos ?? 0);
   const novoSaldo = saldoAtual + valorTotal;
   await ContaCorrente.create({
     usuarioId: ordem.usuarioId,
