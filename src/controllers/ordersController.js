@@ -17,8 +17,9 @@ export async function registrarCompra(req, res) {
 }
 
 export async function executarCompra(req, res) {
-  const { orderId } = req.body;
-  const ordem = await OrdemCompra.findOne({ where: { id: orderId, usuarioId: req.user.id, status: 'pendente' } });
+  const { orderId } = req.params;
+  const id = parseInt(orderId, 10);
+  const ordem = await OrdemCompra.findOne({ where: { id, usuarioId: req.user.id, status: 'pendente' } });
   if (!ordem) return res.status(404).json({ error: 'Ordem não encontrada' });
   const minute = parseInt(req.user.ultimaHoraNegociacao.split(':')[1], 10);
   const market = await loadMarketSnapshot(minute);
@@ -50,8 +51,9 @@ export async function registrarVenda(req, res) {
 }
 
 export async function executarVenda(req, res) {
-  const { orderId } = req.body;
-  const ordem = await OrdemVenda.findOne({ where: { id: orderId, usuarioId: req.user.id, status: 'pendente' } });
+  const { orderId } = req.params;
+  const id = parseInt(orderId, 10);
+  const ordem = await OrdemVenda.findOne({ where: { id, usuarioId: req.user.id, status: 'pendente' } });
   if (!ordem) return res.status(404).json({ error: 'Ordem não encontrada' });
   const minute = parseInt(req.user.ultimaHoraNegociacao.split(':')[1], 10);
   const market = await loadMarketSnapshot(minute);
