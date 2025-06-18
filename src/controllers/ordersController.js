@@ -1,4 +1,4 @@
-import { OrdemCompra, OrdemVenda } from '../models/index.js';
+import { OrdemCompra, OrdemVenda, CarteiraItem } from '../models/index.js';
 import { executePendingOrders } from '../services/orderExecutionService.js';
 import { loadMarketSnapshot } from '../services/priceService.js';
 
@@ -39,6 +39,10 @@ export async function listarCompras(req, res) {
 export async function registrarVenda(req, res) {
   const { ticker, quantidade, modo, precoReferencia } = req.body;
   if (quantidade <= 0) return res.status(400).json({ error: 'Quantidade inválida' });
+  const itemCarteira = await CarteiraItem.findOne({ where: { usuarioId: req.user.id, ticker } });
+  if (!itemCarteira || itemCarteira.quantidade < quantidade) {
+    return res.status(400).json({ error: "Quantidade de ações na carteira insuficiente para essa ordem." });
+  }
   const ordem = await OrdemVenda.create({ usuarioId: req.user.id, ticker, quantidade, modo, precoReferencia: modo==='mercado'?null:precoReferencia });
   if (modo === 'mercado') {
     const minute = parseInt(req.user.ultimaHoraNegociacao.split(':')[1], 10);
