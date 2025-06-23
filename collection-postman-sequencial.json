@@ -1,0 +1,2114 @@
+{
+	"info": {
+		"name": "Corretora API - Teste Sequencial",
+		"description": "Uma coleção para testar todos os fluxos de casos de uso relacionados ao servidor.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"version": "1.0.0"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api",
+			"type": "string",
+			"description": "URL base da sua API. Altere se necessário."
+		},
+		{
+			"key": "userEmail",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userPassword",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "newUserPassword",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "buyOrderId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "sellOrderId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "trackedAssetId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "resetToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Autenticação",
+			"item": [
+				{
+					"name": "(Sucesso) Cadastrar Novo Usuário",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Gera um email e senha aleatórios antes da requisição",
+									"const randomString = Math.random().toString(36).substring(2, 10);",
+									"const email = `teste_${randomString}@example.com`;",
+									"const senha = `senha_${randomString}`;",
+									"",
+									"// Armazena os valores nas variáveis da coleção para usar em outras requisições",
+									"pm.collectionVariables.set(\"userEmail\", email);",
+									"pm.collectionVariables.set(\"userPassword\", senha);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Testa se a resposta da API foi 201 (Created)",
+									"pm.test(\"Status code é 201 - Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"// Testa se a resposta contém uma propriedade 'message' do tipo string",
+									"pm.test(\"Resposta contém uma mensagem de sucesso\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"senha\": \"{{userPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registra um novo usuário com um email e senha gerados aleatoriamente."
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Cadastrar com Email Existente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Testa se a resposta da API foi 400 (Bad Request)",
+									"pm.test(\"Status code é 400 - Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// Testa se a resposta contém uma propriedade 'error' do tipo string",
+									"pm.test(\"Resposta contém uma mensagem de erro\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.error).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"senha\": \"{{userPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Tenta registrar um novo usuário com o mesmo email da requisição anterior para testar a validação de email duplicado."
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Cadastrar com Email Inválido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Testa se a resposta da API foi 400 (Bad Request)",
+									"pm.test(\"Status code é 400 - Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"emailinvalido\",\n    \"senha\": \"senhavalida\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Tenta registrar um usuário com um formato de email inválido."
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Trocar Senha Diretamente sem Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"senhaAtual\": \"qualquercoisa\",\n    \"novaSenha\": \"outracoisa\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/change-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Fazer Login com Senha Inválida",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Testa se a resposta da API foi 401 (Unauthorized)",
+									"pm.test(\"Status code é 401 - Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"senha\": \"senhaincorreta123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Tenta fazer login usando o email correto (salvo na variável) mas com uma senha incorreta."
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Fazer Logout sem Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Testa se a resposta da API foi 401 (Unauthorized), pois nenhum token foi enviado",
+									"pm.test(\"Status code é 401 - Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Tenta fazer logout sem fornecer um token de autenticação para garantir que a rota esteja protegida."
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Fazer Login com Credenciais Válidas",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Testa se a resposta da API foi 200 (OK)",
+									"pm.test(\"Status code é 200 - OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Extrai o token da resposta e o salva em uma variável da coleção",
+									"pm.test(\"Token JWT foi recebido e salvo\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.token).to.be.a('string');",
+									"    pm.collectionVariables.set(\"authToken\", responseData.token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"senha\": \"{{userPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Realiza o login com o email e a senha corretos gerados na primeira etapa."
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Trocar Senha com Senha Antiga Inválida",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"senhaAtual\": \"senha_errada_propositalmente\",\n    \"novaSenha\": \"nova_senha_qualquer\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/change-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Trocar Senha com Senha Antiga Válida",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const randomString = Math.random().toString(36).substring(2, 10);",
+									"const newPassword = `nova_senha_${randomString}`;",
+									"pm.collectionVariables.set(\"newUserPassword\", newPassword);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"senhaAtual\": \"{{userPassword}}\",\n    \"novaSenha\": \"{{newUserPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/change-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Fazer Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Testa se a resposta da API foi 200 (OK)",
+									"pm.test(\"Status code é 200 - OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Testa se a mensagem de logout foi recebida",
+									"pm.test(\"Recebeu mensagem de logout bem-sucedido\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Realiza o logout utilizando o token JWT obtido na etapa de login."
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Pedir Token de Recuperação de Senha",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/pwd-token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"pwd-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Trocar Senha com Token de Recuperação Inválido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tokenRecSenha\": \"token_invalido_qualquer\",\n    \"novaSenha\": \"outra_nova_senha\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/reset-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Trocar Senha com Token de Recuperação Válido",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const randomString = Math.random().toString(36).substring(2, 10);",
+									"const newPassword = `senha_resetada_${randomString}`;",
+									"pm.collectionVariables.set(\"newUserPassword\", newPassword);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tokenRecSenha\": \"colaraqui\",\n    \"novaSenha\": \"{{newUserPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/reset-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Fazer Login com Senha Recuperada",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200 - OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"senha\": \"{{newUserPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Realiza o login com o email e a senha que foi recuperada."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Conta",
+			"item": [
+				{
+					"name": "(Sucesso) Verificar Extrato da Conta",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Resposta deve retornar um array de movimentações\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData).to.be.an(\"Array\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/account/statement",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"account",
+								"statement"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Sacar Valor com Saldo Insuficiente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400 - Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"valor\": 10000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/account/withdraw",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"account",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Depositar Valor Não Numérico",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400 - Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"valor\": \"invalid_value\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/account/deposit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"account",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Depositar Valor Zero",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400 - Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"valor\": 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/account/deposit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"account",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Depositar Valor Negativo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400 - Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"valor\": -100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/account/deposit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"account",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Depositar Valor Válido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200 - OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Resposta contém uma mensagem\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"valor\": 1000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/account/deposit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"account",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Sacar Valor Negativo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400 - Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"valor\": -500\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/account/withdraw",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"account",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Sacar Valor Válido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200 - OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Resposta contém uma mensagem\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.message).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"valor\": 500\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/account/withdraw",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"account",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ordem de Compra",
+			"item": [
+				{
+					"name": "(Falha) Criar Ordem com Quantidade Inválida",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\",\n    \"quantidade\": 0,\n    \"modo\": \"mercado\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/buy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"buy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Criar Ordem a Mercado sem Saldo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\",\n    \"quantidade\": 100,\n    \"modo\": \"mercado\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/buy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"buy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Criar Ordem de Ação Inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"FAKE4\",\n    \"quantidade\": 10,\n    \"modo\": \"mercado\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/buy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"buy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Criar Ordem Limitada sem Saldo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\",\n    \"quantidade\": 100,\n    \"modo\": \"abaixo_de_preco\",\n    \"precoReferencia\": 20.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/buy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"buy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Criar Ordem a Mercado",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\",\n    \"quantidade\": 5,\n    \"modo\": \"mercado\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/buy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"buy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Criar Ordem Limitada",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\",\n    \"quantidade\": 5,\n    \"modo\": \"abaixo_de_preco\",\n    \"precoReferencia\": 30.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/buy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"buy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Criar Ordem de Compra Limitada Com Valor >= Ao De Mercado",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Ordem criada com sucesso e ID salvo\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.collectionVariables.set(\"buyOrderId\", responseData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\",\n    \"quantidade\": 1,\n    \"modo\": \"abaixo_de_preco\",\n    \"precoReferencia\": 35.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/buy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"buy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Executar Ordem de Compra Pendente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Resposta contém status 'executada'\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.status).to.eql('executada');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/buy/{{buyOrderId}}/execute",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"buy",
+								"{{buyOrderId}}",
+								"execute"
+							]
+						},
+						"description": "Executa a ordem de compra limitada que foi criada e deixada como pendente na requisição anterior."
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Listar Ordens de Compra",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Resposta deve ser um array\", function () {",
+									"    pm.expect(pm.response.json().acoes).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/buy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"buy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Visualizar Carteira",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Resposta deve ser um array de ativos\", function () {",
+									"    pm.expect(pm.response.json().acoesCarteira).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/wallet",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"wallet"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ordens de Venda",
+			"item": [
+				{
+					"name": "(Falha) Criar Ordem de Venda com Quantidade Inválida",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\",\n    \"quantidade\": 0,\n    \"modo\": \"mercado\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/sell",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"sell"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Criar Ordem de Venda a Mercado sem Ativo em Carteira",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"MGLU3\",\n    \"quantidade\": 100,\n    \"modo\": \"mercado\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/sell",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"sell"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Criar Ordem de Venda de Ação Inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"FAKE4\",\n    \"quantidade\": 10,\n    \"modo\": \"mercado\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/sell",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"sell"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Criar Ordem de Venda Limitada sem Ativo em Carteira",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"MGLU3\",\n    \"quantidade\": 100,\n    \"modo\": \"a_partir_de_preco\",\n    \"precoReferencia\": 50.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/sell",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"sell"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Criar Ordem de Venda a Mercado",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\",\n    \"quantidade\": 2,\n    \"modo\": \"mercado\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/sell",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"sell"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Criar Ordem de Venda Limitada",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\",\n    \"quantidade\": 2,\n    \"modo\": \"a_partir_de_preco\",\n    \"precoReferencia\": 10.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/sell",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"sell"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Criar Ordem de Venda Limitada Com Valor <= ao de Mercado",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Ordem de venda criada com sucesso e ID salvo\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.collectionVariables.set(\"sellOrderId\", responseData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\",\n    \"quantidade\": 1,\n    \"modo\": \"a_partir_de_preco\",\n    \"precoReferencia\": 15.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/sell",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"sell"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Executar Ordem de Venda Pendente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Resposta contém status 'executada'\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData.status).to.eql('executada');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/sell/{{sellOrderId}}/execute",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"sell",
+								"{{sellOrderId}}",
+								"execute"
+							]
+						},
+						"description": "Executa a ordem de venda limitada que foi criada e deixada como pendente na requisição anterior."
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Listar Ordens de Venda",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Resposta deve ser um array\", function () {",
+									"    pm.expect(pm.response.json()).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/sell",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"sell"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Mercado",
+			"item": [
+				{
+					"name": "(Falha) Acompanhar Ação Inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"FAKE4\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/market/watchlist",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"market",
+								"watchlist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Falha) Parar de Acompanhar Ação Inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/market/watchlist/FAKE4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"market",
+								"watchlist",
+								"FAKE4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Acompanhar Ação 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Ação acompanhada e Ticker salvo\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.collectionVariables.set(\"trackedAssetId\", responseData.ticker);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"MGLU3\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/market/watchlist",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"market",
+								"watchlist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Avançar Tempo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"incrementoMinutos\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/market/clock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"market",
+								"clock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Listar Ações Acompanhadas",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"A resposta deve ser um array\", function () {",
+									"    pm.expect(pm.response.json().acoes).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/market/watchlist",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"market",
+								"watchlist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Acompanhar Ação 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ticker\": \"PETR4\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/market/watchlist",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"market",
+								"watchlist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Mover Ação Acompanhada",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"novaOrdem\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/market/watchlist/{{trackedAssetId}}/move",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"market",
+								"watchlist",
+								"{{trackedAssetId}}",
+								"move"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Sucesso) Parar de Acompanhar Ação",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/market/watchlist/{{trackedAssetId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"market",
+								"watchlist",
+								"{{trackedAssetId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": []
+}

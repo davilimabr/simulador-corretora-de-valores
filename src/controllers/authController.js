@@ -1,26 +1,46 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import { Usuario } from '../models/index.js';
+import { Usuario, AcaoInteresse } from '../models/index.js';
+import sequelize from '../config/database.js';
+import { getRandomTickers } from '../utils/tickersValidos.js';
 
 dotenv.config();
 
 export async function register(req, res) {
   const { email, senha } = req.body;
   if (!email || !senha) return res.status(400).json({ error: 'Email e senha obrigatórios' });
+  const t = await sequelize.transaction();
   try {
-    const existing = await Usuario.findOne({ where: { email } });
-    if (existing) return res.status(400).json({ error: 'Email já está em uso' });
+    const existing = await Usuario.findOne({ where: { email }, transaction: t });
+    if (existing) {
+      await t.rollback();
+      return res.status(400).json({ error: 'Email já está em uso' });
+    }
     const senhaHash = await bcrypt.hash(senha, 10);
-    const user = await Usuario.create({ email, senhaHash });
+    const user = await Usuario.create({ email, senhaHash }, { transaction: t });
+
+    // Adiciona 10 ações aleatórias à lista de interesse do novo usuário
+    const randomTickers = getRandomTickers();
+    const acoesInteresse = randomTickers.map((ticker, index) => ({
+      usuarioId: user.id,
+      ticker: ticker,
+      ordem: index + 1,
+    }));
+    await AcaoInteresse.bulkCreate(acoesInteresse, { transaction: t });
+    await t.commit();
+
     return res.status(201).json({ userId: user.id, message: 'Conta criada com sucesso' });
   } catch (err) {
-    return res.status(500).json({ error: 'Erro no servidor' });
+    await t.rollback();
+    console.error('Erro no registro de novo usuário:', err);
+    return res.status(500).json({ error: 'Erro interno no servidor ao tentar registrar.' });
   }
 }
 
 export async function login(req, res) {
   const { email, senha } = req.body;
+  if (!email || !senha) return res.status(400).json({ error: 'Email e senha obrigatórios' });
   const user = await Usuario.findOne({ where: { email } });
   if (!user) return res.status(401).json({ error: 'Credenciais inválidas' });
   const match = await bcrypt.compare(senha, user.senhaHash);

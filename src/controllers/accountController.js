@@ -2,7 +2,7 @@ import { ContaCorrente } from '../models/index.js';
 
 export async function deposito(req, res) {
   const { descricao, valor } = req.body;
-  if (valor <= 0) return res.status(400).json({ error: 'Valor inválido' });
+  if (typeof valor !== 'number' || valor <= 0 || isNaN(valor)) return res.status(400).json({ error: 'Valor inválido' });
   const ult = await ContaCorrente.findOne({ where: { usuarioId: req.user.id }, order: [['dataHora','DESC']] });
   const saldoAtual = parseFloat(ult?.saldoApos ?? 0);
   const novoSaldo = saldoAtual + valor;
@@ -12,7 +12,7 @@ export async function deposito(req, res) {
 
 export async function retirada(req, res) {
   const { descricao, valor } = req.body;
-  if (valor <= 0) return res.status(400).json({ error: 'Valor inválido' });
+  if (typeof valor !== 'number' || valor <= 0 || isNaN(valor)) return res.status(400).json({ error: 'Valor inválido' });
   const ult = await ContaCorrente.findOne({ where: { usuarioId: req.user.id }, order: [['dataHora','DESC']] });
   const saldoAtual = parseFloat(ult?.saldoApos ?? 0);
   if (saldoAtual < valor) return res.status(400).json({ error: 'Saldo insuficiente' });
