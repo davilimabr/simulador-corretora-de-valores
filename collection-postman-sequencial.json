@@ -1125,8 +1125,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code é 404\", function () {",
-									"    pm.response.to.have.status(404);",
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1523,8 +1523,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code é 404\", function () {",
-									"    pm.response.to.have.status(404);",
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1807,8 +1807,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code é 404\", function () {",
-									"    pm.response.to.have.status(404);",
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1847,8 +1847,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code é 404\", function () {",
-									"    pm.response.to.have.status(404);",
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1970,7 +1970,7 @@
 									"});",
 									"",
 									"pm.test(\"A resposta deve ser um array\", function () {",
-									"    pm.expect(pm.response.json()).to.be.an('array');",
+									"    pm.expect(pm.response.json().acoes).to.be.an('array');",
 									"});"
 								],
 								"type": "text/javascript"
