@@ -1,18 +1,35 @@
-import { advanceClock } from '../services/clockService.js';
-import { loadMarketSnapshot } from '../services/priceService.js';
-import sequelize, { AcaoInteresse, Usuario } from '../models/index.js';
+import { loadMarketSnapshot, getClosingPrices, getMinutePrices, mapPricesWithVariation } from '../services/priceService.js';
+import sequelize, { AcaoInteresse } from '../models/index.js';
 import { executePendingOrders } from '../services/orderExecutionService.js';
 import { isTickerValido } from '../utils/tickersValidos.js';
+import moment from 'moment';
+
 
 export async function clockTick(req, res) {
   const inc = parseInt(req.body.incrementoMinutos || 1, 10);
+  if (isNaN(inc) || inc <= 0) {
+    return res.status(400).json({ error: 'O incremento de minutos é inválido.' });
+  }
   const user = req.user;
-  user.ultimaHoraNegociacao = advanceClock(user.ultimaHoraNegociacao, inc);
+  const initialTime = moment(`2000-01-01 ${user.ultimaHoraNegociacao}`, 'YYYY-MM-DD HH:mm');
+  let finalMarketData;
+  const closingPrices = await getClosingPrices();
+  for (let i = 1; i <= inc; i++) {
+    const nextTime = initialTime.clone().add(i, 'minutes');
+    const minute = nextTime.minute();
+    try {
+      const minutePrices = await getMinutePrices(minute);
+      const marketData = mapPricesWithVariation(minutePrices, closingPrices);
+      await executePendingOrders(user.id, marketData);
+      if (i === inc) finalMarketData = marketData;
+    } catch (error) {
+      console.error(`Erro ao buscar ou processar os preços para o minuto ${minute}:`, error);
+      if (i === inc) finalMarketData = [];
+    }
+  }
+  user.ultimaHoraNegociacao = initialTime.clone().add(inc, 'minutes').format('HH:mm');
   await user.save();
-  const minute = parseInt(user.ultimaHoraNegociacao.split(':')[1], 10);
-  const market = await loadMarketSnapshot(minute);
-  await executePendingOrders(user.id, market);
-  return res.json({ novaHoraNegociacao: user.ultimaHoraNegociacao, acoes: market });
+  return res.json({ novaHoraNegociacao: user.ultimaHoraNegociacao, acoes: finalMarketData });
 }
 
 export async function addWatch(req, res) {
