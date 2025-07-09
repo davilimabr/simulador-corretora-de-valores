@@ -21,8 +21,8 @@ export const OrdemCompra = sequelize.define('OrdemCompra', {
   ticker: DataTypes.STRING,
   quantidade: DataTypes.INTEGER,
   modo: DataTypes.ENUM('mercado','abaixo_de_preco'),
-  precoReferencia: DataTypes.DECIMAL(10,2),
-  precoExecucao: DataTypes.DECIMAL(10,2),
+  precoReferencia: DataTypes.DECIMAL(10,4),
+  precoExecucao: DataTypes.DECIMAL(10,4),
   status: { type: DataTypes.ENUM('pendente','executada'), defaultValue: 'pendente' },
   dataHoraExecucao: DataTypes.DATE
 });
@@ -32,8 +32,8 @@ export const OrdemVenda = sequelize.define('OrdemVenda', {
   ticker: DataTypes.STRING,
   quantidade: DataTypes.INTEGER,
   modo: DataTypes.ENUM('mercado','a_partir_de_preco'),
-  precoReferencia: DataTypes.DECIMAL(10,2),
-  precoExecucao: DataTypes.DECIMAL(10,2),
+  precoReferencia: DataTypes.DECIMAL(10,4),
+  precoExecucao: DataTypes.DECIMAL(10,4),
   status: { type: DataTypes.ENUM('pendente','executada'), defaultValue: 'pendente' },
   dataHoraExecucao: DataTypes.DATE
 });
@@ -42,7 +42,7 @@ export const CarteiraItem = sequelize.define('CarteiraItem', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   ticker: DataTypes.STRING,
   quantidade: DataTypes.INTEGER,
-  precoCompraMedio: DataTypes.DECIMAL(10,2)
+  precoCompraMedio: DataTypes.DECIMAL(10,4)
 });
 
 export const ContaCorrente = sequelize.define('ContaCorrente', {
@@ -50,8 +50,8 @@ export const ContaCorrente = sequelize.define('ContaCorrente', {
   dataHora: DataTypes.DATE,
   descricao: DataTypes.STRING,
   tipo: DataTypes.ENUM('deposito','retirada'),
-  valor: DataTypes.DECIMAL(10,2),
-  saldoApos: DataTypes.DECIMAL(10,2)
+  valor: DataTypes.DECIMAL(10,4),
+  saldoApos: DataTypes.DECIMAL(10,4)
 });
 
 // Associações

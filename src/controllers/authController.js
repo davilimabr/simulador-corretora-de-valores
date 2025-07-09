@@ -4,12 +4,17 @@ import dotenv from 'dotenv';
 import { Usuario, AcaoInteresse } from '../models/index.js';
 import sequelize from '../config/database.js';
 import { getRandomTickers } from '../utils/tickersValidos.js';
+import { isValidEmail, isStrongPassword } from '../utils/fieldsValidators.js';
 
 dotenv.config();
 
 export async function register(req, res) {
   const { email, senha } = req.body;
   if (!email || !senha) return res.status(400).json({ error: 'Email e senha obrigatórios' });
+  if (!isValidEmail(email)) return res.status(400).json({ error: 'Formato de email inválido.' });
+  if (!isStrongPassword(senha)) return res.status(400).json({
+      error: 'A senha deve ter no mínimo 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial.'
+    });
   const t = await sequelize.transaction();
   try {
     const existing = await Usuario.findOne({ where: { email }, transaction: t });
@@ -19,8 +24,7 @@ export async function register(req, res) {
     }
     const senhaHash = await bcrypt.hash(senha, 10);
     const user = await Usuario.create({ email, senhaHash }, { transaction: t });
-
-    // Adiciona 10 ações aleatórias à lista de interesse do novo usuário
+    
     const randomTickers = getRandomTickers();
     const acoesInteresse = randomTickers.map((ticker, index) => ({
       usuarioId: user.id,
@@ -50,7 +54,6 @@ export async function login(req, res) {
 }
 
 export function logout(_req, res) {
-  // Para JWT, logout é responsabilidade do client (descartar token). Opcional: blacklist em cache.
   return res.json({ message: 'Logout realizado com sucesso' });
 }
 
@@ -68,6 +71,10 @@ export async function requestResetToken(req, res) {
 
 export async function resetPassword(req, res) {
   const { tokenRecSenha, novaSenha } = req.body;
+  if (!tokenRecSenha || !novaSenha) return res.status(400).json({ error: 'Token e nova senha são obrigatórios' });
+  if (!isStrongPassword(novaSenha)) return res.status(400).json({
+    error: 'A senha deve ter no mínimo 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial.'
+  });
   const user = await Usuario.findOne({ where: { tokenRecSenha } });
   if (!user) return res.status(400).json({ error: 'Token inválido ou expirado' });
   const diff = (Date.now() - new Date(user.dataTokenRS).getTime()) / 1000 / 60; // minutos
@@ -80,6 +87,10 @@ export async function resetPassword(req, res) {
 
 export async function changePassword(req, res) {
   const { senhaAtual, novaSenha } = req.body;
+  if (!senhaAtual || !novaSenha) return res.status(400).json({ error: 'Senha atual e nova senha são obrigatórias' });
+  if (!isStrongPassword(novaSenha)) return res.status(400).json({
+    error: 'A senha deve ter no mínimo 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial.'
+  });
   const user = req.user;
   const match = await bcrypt.compare(senhaAtual, user.senhaHash);
   if (!match) return res.status(400).json({ error: 'Senha atual incorreta' });
