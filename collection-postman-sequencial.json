@@ -77,7 +77,7 @@
 									"// Gera um email e senha aleatórios antes da requisição",
 									"const randomString = Math.random().toString(36).substring(2, 10);",
 									"const email = `teste_${randomString}@example.com`;",
-									"const senha = `senha_${randomString}`;",
+									"const senha = `Senha_0${randomString}`;",
 									"",
 									"// Armazena os valores nas variáveis da coleção para usar em outras requisições",
 									"pm.collectionVariables.set(\"userEmail\", email);",
@@ -411,7 +411,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"senhaAtual\": \"senha_errada_propositalmente\",\n    \"novaSenha\": \"nova_senha_qualquer\"\n}",
+							"raw": "{\n    \"senhaAtual\": \"senha_errada_propositalmente\",\n    \"novaSenha\": \"Nova_Senha_Qualquer0\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -439,7 +439,7 @@
 							"script": {
 								"exec": [
 									"const randomString = Math.random().toString(36).substring(2, 10);",
-									"const newPassword = `nova_senha_${randomString}`;",
+									"const newPassword = `Nova_Senha_0${randomString}`;",
 									"pm.collectionVariables.set(\"newUserPassword\", newPassword);"
 								],
 								"type": "text/javascript"
@@ -615,7 +615,7 @@
 							"script": {
 								"exec": [
 									"const randomString = Math.random().toString(36).substring(2, 10);",
-									"const newPassword = `senha_resetada_${randomString}`;",
+									"const newPassword = `Senha_Resetada_0${randomString}`;",
 									"pm.collectionVariables.set(\"newUserPassword\", newPassword);"
 								],
 								"type": "text/javascript"
