@@ -8,15 +8,16 @@ export async function listarCarteira(req, res) {
   const itens = await CarteiraItem.findAll({ where: { usuarioId: user.id } });
   const acoesCarteira = itens.map((i) => {
     const m = market.find((mm) => mm.ticker === i.ticker);
+    const precoCompraMedio = parseFloat(i.precoCompraMedio); 
     const valorTotalAtual = i.quantidade * m.precoAtual;
-    const ganhoPerdaUnitaria = m.precoAtual - i.precoCompraMedio;
+    const ganhoPerdaUnitaria = m.precoAtual - precoCompraMedio; // Cálculo agora é preciso
     return {
       tickerAcao: i.ticker,
       qtde: i.quantidade,
-      precoCompraMedio: Number(i.precoCompraMedio),
+      precoCompraMedio: precoCompraMedio,
       precoAtual: m.precoAtual,
       valorTotalAtual,
-      ganhoPerdaUnitaria: Number(ganhoPerdaUnitaria.toFixed(2)),
+      ganhoPerdaUnitaria: Number(ganhoPerdaUnitaria.toFixed(4)), // pode manter 4 casas para consistência
       ganhoPerdaTotal: Number((ganhoPerdaUnitaria * i.quantidade).toFixed(2)),
       variacaoNominalDia: m.variacaoNominal,
       variacaoPercentualDia: m.variacaoPercentual
